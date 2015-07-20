@@ -1,4 +1,5 @@
-// Simple TCP server in c
+// Made by Tijndagamer
+// Released under the MIT license
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -6,6 +7,7 @@
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <string.h>
 
 void server(int port);
 
@@ -73,7 +75,7 @@ void server(int port)
         // Accept the connection
         newsockfd = accept(sockfd, (struct sockaddr *) &client_addr, &client_length);
         if (newsockfd < 0) { error("ERROR accepting"); }
-        printf("Connection established\n");
+        printf("Connection established.\n");
 
         // Set al vlues of buffer to zero
         bzero(buffer, 256);
@@ -84,8 +86,9 @@ void server(int port)
             bzero(buffer, 256);
             n = read(newsockfd, buffer, 255);
             if (n < 0) { error("ERROR reading from socket"); }
-            printf("%s", buffer);
-            if (buffer == "exit") { break; }
+//            printf("%s", buffer);
+            printf(buffer);
+            if (strcmp(buffer,"--EXIT--\n") == 0) { break; }
         }
 
         printf("Connection terminated.\n");

@@ -1,8 +1,12 @@
+// Made by Tijndagamer
+// Released under the MIT license
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <string.h>
 
 void error(char *msg)
 {
@@ -61,7 +65,12 @@ int main(int argc, char *argv[])
         bzero(buffer, 256);
         printf("<you> ");
         fgets(buffer, 255, stdin);
-//        printf("%s", buffer);
+//        gets(buffer);
+        if (strcmp(buffer,"--EXIT--\n") == 0)
+        {
+            n = write(sockfd, buffer, strlen(buffer));
+            break;
+        }
         n = write(sockfd, buffer, strlen(buffer));
         if (n < 0) { error("ERROR writing to socket"); }
 
@@ -71,6 +80,9 @@ int main(int argc, char *argv[])
 //        if (n < 0) { error("ERROR reading from socket"); }
 //        printf("%s\n", buffer);
     }
+
+    shutdown(sockfd, 2);
+    printf("Connection closed.\n");
 
     return 0;
 }
