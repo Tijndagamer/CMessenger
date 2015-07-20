@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
 
     // Same as in server.c
     port = atoi(argv[2]);
-//    port = 5005;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
     {
@@ -65,12 +64,16 @@ int main(int argc, char *argv[])
         bzero(buffer, 256);
         printf("<you> ");
         fgets(buffer, 255, stdin);
-//        gets(buffer);
+
+        // Check for exit command
         if (strcmp(buffer,"--EXIT--\n") == 0)
         {
             n = write(sockfd, buffer, strlen(buffer));
             break;
         }
+
+        strcat(buffer, "id");
+
         n = write(sockfd, buffer, strlen(buffer));
         if (n < 0) { error("ERROR writing to socket"); }
 

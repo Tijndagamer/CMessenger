@@ -86,7 +86,6 @@ void server(int port)
             bzero(buffer, 256);
             n = read(newsockfd, buffer, 255);
             if (n < 0) { error("ERROR reading from socket"); }
-//            printf("%s", buffer);
             printf(buffer);
             if (strcmp(buffer,"--EXIT--\n") == 0) { break; }
         }
