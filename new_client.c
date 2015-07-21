@@ -9,6 +9,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <time.h>
+//#include <unistd.h>
 
 void sender(char *server_char);
 void receiver(int needs_arg);
@@ -16,11 +18,17 @@ void receiver(int needs_arg);
 void error(char *msg)
 {
     perror(msg);
-    exit(0);
+    exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[])
 {
+    if (argc < 3)
+    {
+        printf("Usage: %s hostname port\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
     const int need_arg = 5;
     pthread_t sender_thread, receiver_thread;
     int sender_thread_result, receiver_thread_result;
@@ -37,24 +45,19 @@ int main(int argc, char *argv[])
 void sender(char *server_char)
 {
     const int port = 5005;
-    int sockfd, n;
+    int attempts = 50; /* Maximum amount of connection attempts */
+    int sockfd, n, connect_result;
     struct sockaddr_in server_addr;
     struct hostent *server;
     char buffer[256];
 
     // Same as in server.c
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
-    {
-        error("ERROR opening socket");
-    }
+    if (sockfd < 0) { error("ERROR opening socket"); }
 
     // Speaks for itself
     server = gethostbyname(server_char);
-    if (server == NULL)
-    {
-        fprintf(stderr, "ERROR, no such host\n");
-    }
+    if (server == NULL) { error("ERROR, no such host\n"); }
 
     // Same as in server.c
     bzero((char *) &server_addr, sizeof(server_addr));
@@ -65,7 +68,22 @@ void sender(char *server_char)
     server_addr.sin_port = htons(port);
 
     // Connect to the server
-    if (connect(sockfd, &server_addr, sizeof(server_addr)) < 0) { error("ERROR connecting"); }
+    while (attempts > 0)
+    {
+        connect_result = connect(sockfd, &server_addr, sizeof(server_addr));
+        if(connect_result < 0)
+        {
+            // Connection has failed, try again
+            printf("Connection error, trying again in 1 second...\n");
+            sleep(1);
+            attempts--;
+        } else {
+            // Connection worked, we can stop the loop
+            printf("Got a connection!\n");
+            break;
+        }
+    }
+    if (attempts < 1) { error("Connecting failed to much.\n"); }
 
     // Get & send the nickname
     char nickname[256];
@@ -76,7 +94,6 @@ void sender(char *server_char)
 
     while (1)
     {
-
         // Send message
         bzero(buffer, 256);
         printf("<you> ");
@@ -108,10 +125,7 @@ void receiver(int needs_arg)
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (sockfd < 0)
-    {
-        error("ERROR opening socket");
-    }
+    if (sockfd < 0) { error("ERROR opening socket"); }
 
     // Set all values of the server_addr to zero
     bzero((char *) &server_addr, sizeof(server_addr));
@@ -123,10 +137,7 @@ void receiver(int needs_arg)
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
     // Bind socket to address
-    if (bind(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
-    {
-        error("ERROR binding");
-    }
+    if (bind(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) { error("ERROR binding"); }
 
     // Listen for connections
     listen(sockfd, 5);
@@ -148,16 +159,23 @@ void receiver(int needs_arg)
 
         printf("Connection established with %s\n", client_nickname);
 
-        // Set al vlues of buffer to zero
+        // Zero the buffer
         bzero(buffer, 256);
 
         // Read the socket
         while (1)
         {
+            // Zero the buffer
             bzero(buffer, 256);
+
+            // Read the socket
             n = read(newsockfd, buffer, 255);
             if (n < 0) { error("ERROR reading from socket"); }
-            printf("<%s> %s\n", client_nickname, buffer);
+
+            // Print the output
+            printf("<%s> %s", client_nickname, buffer);
+
+            // Check for internal commands
             if (strcmp(buffer,"--EXIT--\n") == 0) { break; }
         }
     }
