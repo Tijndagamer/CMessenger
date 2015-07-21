@@ -52,10 +52,14 @@ int main(int argc, char *argv[])
     server_addr.sin_port = htons(port);
 
     // Connect to the server
-    if (connect(sockfd, &server_addr, sizeof(server_addr)) < 0)
-    {
-        error("ERROR connecting");
-    }
+    if (connect(sockfd, &server_addr, sizeof(server_addr)) < 0) { error("ERROR connecting"); }
+
+    // Get & send the nickname
+    char nickname[256];
+    bzero(nickname, 256);
+    printf("Nickname = ");
+    fgets(nickname, 255, stdin);
+    n = write(sockfd, nickname, strlen(nickname));
 
     while (1)
     {

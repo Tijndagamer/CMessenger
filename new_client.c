@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 void sender(char *server_char);
-void receiver();
+void receiver(int needs_arg);
 
 void error(char *msg)
 {
@@ -65,10 +65,14 @@ void sender(char *server_char)
     server_addr.sin_port = htons(port);
 
     // Connect to the server
-    if (connect(sockfd, &server_addr, sizeof(server_addr)) < 0)
-    {
-        error("ERROR connecting");
-    }
+    if (connect(sockfd, &server_addr, sizeof(server_addr)) < 0) { error("ERROR connecting"); }
+
+    // Get & send the nickname
+    char nickname[256];
+    bzero(nickname, 256);
+    printf("Nickname = ");
+    fgets(nickname, 255, stdin);
+    n = write(sockfd, nickname, strlen(nickname));
 
     while (1)
     {
@@ -129,12 +133,20 @@ void receiver(int needs_arg)
 
     while (1)
     {
+        bzero(buffer, 256);
         client_length = sizeof(client_addr);
+        char client_nickname[256];
 
         // Accept the connection
         newsockfd = accept(sockfd, (struct sockaddr *) &client_addr, &client_length);
         if (newsockfd < 0) { error("ERROR accepting"); }
-        printf("Connection established.\n");
+
+        // Get the nickname of the client
+        n = read(newsockfd, client_nickname, 255);
+        if (n < 0) { error("ERROR reading from socket while getting nickname"); }
+        strtok(client_nickname, "\n");
+
+        printf("Connection established with %s\n", client_nickname);
 
         // Set al vlues of buffer to zero
         bzero(buffer, 256);
@@ -145,10 +157,8 @@ void receiver(int needs_arg)
             bzero(buffer, 256);
             n = read(newsockfd, buffer, 255);
             if (n < 0) { error("ERROR reading from socket"); }
-            printf(buffer);
+            printf("<%s> %s\n", client_nickname, buffer);
             if (strcmp(buffer,"--EXIT--\n") == 0) { break; }
         }
-
-        printf("Connection terminated.\n");
     }
 }

@@ -21,7 +21,7 @@ void error(char *msg)
 int main(int argc, char *argv[])
 {
     pthread_t server_thread1, server_thread2;
-    const int port1 = 5005;
+    const int port1 = 6969;
     const int port2 = 5006;
     int result_server_thread1, result_server_thread2;
 
@@ -70,12 +70,20 @@ void server(int port)
 
     while (1)
     {
+        bzero(buffer, 256);
         client_length = sizeof(client_addr);
+        char client_nickname[256];
 
         // Accept the connection
         newsockfd = accept(sockfd, (struct sockaddr *) &client_addr, &client_length);
         if (newsockfd < 0) { error("ERROR accepting"); }
-        printf("Connection established.\n");
+
+        // Get the nickname of the client
+        n = read(newsockfd, client_nickname, 255);
+        if (n < 0) { error("ERROR reading from socket while getting nickname"); }
+        strtok(client_nickname, "\n");
+
+        printf("Connection established with %s\n", client_nickname);
 
         // Set al vlues of buffer to zero
         bzero(buffer, 256);
@@ -86,10 +94,10 @@ void server(int port)
             bzero(buffer, 256);
             n = read(newsockfd, buffer, 255);
             if (n < 0) { error("ERROR reading from socket"); }
-            printf(buffer);
+            printf("<%s> %s\n", client_nickname, buffer);
             if (strcmp(buffer,"--EXIT--\n") == 0) { break; }
         }
 
-        printf("Connection terminated.\n");
+        printf("Connection with %s closed.\n", client_nickname);
     }
 }
