@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
-//#include <unistd.h>
 
 void sender(char *server_char);
 void receiver(int needs_arg);
@@ -112,6 +111,8 @@ void sender(char *server_char)
 
     shutdown(sockfd, 2);
     printf("Connection closed.\n");
+
+    exit(0);
 }
 
 void receiver(int needs_arg)
@@ -173,10 +174,12 @@ void receiver(int needs_arg)
             if (n < 0) { error("ERROR reading from socket"); }
 
             // Print the output
-            printf("<%s> %s", client_nickname, buffer);
+            printf("\n<%s> %s", client_nickname, buffer);
 
             // Check for internal commands
             if (strcmp(buffer,"--EXIT--\n") == 0) { break; }
         }
+
+        printf("Connection with %s closed.\n", client_nickname);
     }
 }
