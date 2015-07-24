@@ -11,8 +11,15 @@
 #include <pthread.h>
 #include <time.h>
 
+// Global variables
+char *recv_msg = NULL;
+char *send_msg = NULL;
+char connected_client_nickname[256];
+char nickname[256];
+
 void sender(char *server_char);
 void receiver(int needs_arg);
+void output(int needs_arg);
 
 void error(char *msg)
 {
@@ -28,12 +35,13 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    const int need_arg = 5;
-    pthread_t sender_thread, receiver_thread;
-    int sender_thread_result, receiver_thread_result;
+    const int need_arg = 2; /* I need to pass an argument to the function used in pthread, so why not pass my lucky number?*/
+    pthread_t sender_thread, receiver_thread, output_thread;
+    int sender_thread_result, receiver_thread_result, output_thread_result;
 
     sender_thread_result = pthread_create(&sender_thread, NULL, sender, (void*) argv[1]);
     receiver_thread_result = pthread_create(&receiver_thread, NULL, receiver, (void*) need_arg);
+    output_thread_result = pthread_create(&output_thread, NULL, output, (void*) need_arg);
 
     pthread_join(sender_thread, NULL);
     pthread_join(receiver_thread, NULL);
@@ -50,7 +58,7 @@ void sender(char *server_char)
     struct hostent *server;
     char buffer[256];
 
-    // Same as in server.c
+    // Opening socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) { error("ERROR opening socket"); }
 
@@ -85,7 +93,6 @@ void sender(char *server_char)
     if (attempts < 1) { error("Connecting failed to much.\n"); }
 
     // Get & send the nickname
-    char nickname[256];
     bzero(nickname, 256);
     printf("Nickname = ");
     fgets(nickname, 255, stdin);
@@ -146,19 +153,18 @@ void receiver(int needs_arg)
     while (1)
     {
         bzero(buffer, 256);
-        client_length = sizeof(client_addr);
-        char client_nickname[256];
+        client_length = sizeof(client_addr);;
 
         // Accept the connection
         newsockfd = accept(sockfd, (struct sockaddr *) &client_addr, &client_length);
         if (newsockfd < 0) { error("ERROR accepting"); }
 
         // Get the nickname of the client
-        n = read(newsockfd, client_nickname, 255);
+        n = read(newsockfd, connected_client_nickname, 255);
         if (n < 0) { error("ERROR reading from socket while getting nickname"); }
-        strtok(client_nickname, "\n");
+        strtok(connected_client_nickname, "\n");
 
-        printf("Connection established with %s\n", client_nickname);
+        printf("Connection established with %s\n", connected_client_nickname);
 
         // Zero the buffer
         bzero(buffer, 256);
@@ -174,12 +180,44 @@ void receiver(int needs_arg)
             if (n < 0) { error("ERROR reading from socket"); }
 
             // Print the output
-            printf("\n<%s> %s", client_nickname, buffer);
+            //printf("\n<%s> %s", connected_client_nickname, buffer);
+            recv_msg = buffer;
 
             // Check for internal commands
             if (strcmp(buffer,"--EXIT--\n") == 0) { break; }
         }
 
-        printf("Connection with %s closed.\n", client_nickname);
+        printf("Connection with %s closed.\n", connected_client_nickname);
     }
+}
+
+void output(int needs_arg)
+{
+    char *prev_send_msg, *prev_recv_msg;
+
+    // Receive msg printing
+
+    //bzero(prev_recv_msg, 256);
+    //bzero(prev_send_msg, 256);
+
+    //printf("<%s> %s \n", connected_client_nickname, recv_msg);
+    //prev_recv_msg = recv_msg;
+
+    /*
+    while(1)
+    {
+        if (!(strcmp(prev_recv_msg, recv_msg) == 0))
+        {
+            printf("<%s> %s\n", connected_client_nickname, recv_msg);
+        }
+    }
+    */
+
+    // Send msg printing
+    /*
+    while (1)
+    {
+
+    }
+    */
 }
