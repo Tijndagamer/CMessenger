@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
+#include <unistd.h>
 
 // Global variables
 char *recv_msg = NULL;
@@ -198,10 +199,11 @@ void receiver(int needs_arg)
 void output(int needs_arg)
 {
     char *prev_send_msg, *prev_recv_msg;
-    char *prev_msg = ".";
+    char prev_msg[256];
 
     printf(msg);
-    prev_msg = msg;
+    //prev_msg = msg;
+    strcpy(prev_msg, msg);
 
     while(1)
     {
@@ -209,8 +211,13 @@ void output(int needs_arg)
         {
             printf("Got into if statement in output\n");
             printf("%s\n", msg);
-            prev_msg = msg;
+            //prev_msg = msg;
+            strcpy(prev_msg, msg);
+
             printf("%s %s \n", msg, prev_msg);
+
+            // Sleep for 10ms
+            usleep(10);
         }
     }
 
