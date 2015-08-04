@@ -201,7 +201,6 @@ void receiver(int needs_arg)
 
 void output(int needs_arg)
 {
-    char *prev_send_msg, *prev_recv_msg;
     char prev_msg[256];
 
     printf(msg);
@@ -209,16 +208,11 @@ void output(int needs_arg)
 
     while(1)
     {
-        if(strcmp(prev_msg, msg) != 0)
+        if(msg_is_changed == 1)
         {
-            printf("%s\n", msg);
-            strcpy(prev_msg, msg);
-
-            //printf("%s %s \n", msg, prev_msg);
+            printf("\n %s", msg);
             msg_is_changed = 0;
-
-            // Sleep for 10ms
-            usleep(10);
+            usleep(100);
         }
     }
 }
