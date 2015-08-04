@@ -18,7 +18,8 @@ char *send_msg = NULL;
 char connected_client_nickname[256];
 char nickname[256];
 
-char *msg = ".";
+char msg[256];
+int msg_is_changed;
 
 void sender(char *server_char);
 void receiver(int needs_arg);
@@ -185,8 +186,10 @@ void receiver(int needs_arg)
             // Print the output
             //printf("\n<%s> %s", connected_client_nickname, buffer);
             //recv_msg = buffer;
-            msg = buffer;
-//            printf("%s %s\n", msg, buffer);
+
+            //msg = buffer;
+            strcpy(msg, buffer);
+            msg_is_changed = 1;
 
             // Check for internal commands
             if (strcmp(buffer,"--EXIT--\n") == 0) { break; }
@@ -202,48 +205,20 @@ void output(int needs_arg)
     char prev_msg[256];
 
     printf(msg);
-    //prev_msg = msg;
     strcpy(prev_msg, msg);
 
     while(1)
     {
         if(strcmp(prev_msg, msg) != 0)
         {
-            printf("Got into if statement in output\n");
             printf("%s\n", msg);
-            //prev_msg = msg;
             strcpy(prev_msg, msg);
 
-            printf("%s %s \n", msg, prev_msg);
+            //printf("%s %s \n", msg, prev_msg);
+            msg_is_changed = 0;
 
             // Sleep for 10ms
             usleep(10);
         }
     }
-
-    // Receive msg printing
-
-    //bzero(prev_recv_msg, 256);
-    //bzero(prev_send_msg, 256);
-
-    //printf("<%s> %s \n", connected_client_nickname, recv_msg);
-    //prev_recv_msg = recv_msg;
-
-    /*
-    while(1)
-    {
-        if (!(strcmp(prev_recv_msg, recv_msg) == 0))
-        {
-            printf("<%s> %s\n", connected_client_nickname, recv_msg);
-        }
-    }
-    */
-
-    // Send msg printing
-    /*
-    while (1)
-    {
-
-    }
-    */
 }
