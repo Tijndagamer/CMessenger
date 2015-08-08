@@ -21,14 +21,12 @@ int main(int argc, char *argv[])
     struct hostent *server;
     char buffer[256];
 
-    // Check arguments
     if (argc < 3)
     {
         fprintf(stderr, "Usage: %s hostname port\n", argv[0]);
         exit(0);
     }
 
-    // Same as in server.c
     port = atoi(argv[2]);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -43,11 +41,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "ERROR, no such host\n");
     }
 
-    // Same as in server.c
     bzero((char *) &server_addr, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
 
-    // Mostly same as in server.c
     bcopy((char *)server->h_addr, (char *)&server_addr.sin_addr.s_addr, server->h_length);
     server_addr.sin_port = htons(port);
 
@@ -69,7 +65,6 @@ int main(int argc, char *argv[])
         printf("<you> ");
         fgets(buffer, 255, stdin);
 
-        // Check for exit command
         if (strcmp(buffer,"--EXIT--\n") == 0)
         {
             n = write(sockfd, buffer, strlen(buffer));

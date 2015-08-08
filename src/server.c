@@ -21,7 +21,7 @@ void error(char *msg)
 int main(int argc, char *argv[])
 {
     pthread_t server_thread1, server_thread2;
-    const int port1 = 6969;
+    const int port1 = 5005;
     const int port2 = 5006;
     int result_server_thread1, result_server_thread2;
 
@@ -36,7 +36,6 @@ int main(int argc, char *argv[])
 
 void server(int port)
 {
-    // Variables
     int sockfd, newsockfd;
     int client_length;
     int n;
@@ -50,22 +49,21 @@ void server(int port)
         error("ERROR opening socket");
     }
 
-    // Set all values of the server_addr to zero
     bzero((char *) &server_addr, sizeof(server_addr));
-    // Set address family
+
     server_addr.sin_family = AF_INET;
+    
     // Convert port to network byte order and assign the port of the server
     server_addr.sin_port = htons(port);
+    
     // Set the server address to the IP of the host
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
-    // Bind socket to address
     if (bind(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
     {
         error("ERROR binding");
     }
 
-    // Listen for connections
     listen(sockfd, 5);
 
     while (1)
@@ -74,7 +72,6 @@ void server(int port)
         client_length = sizeof(client_addr);
         char client_nickname[256];
 
-        // Accept the connection
         newsockfd = accept(sockfd, (struct sockaddr *) &client_addr, &client_length);
         if (newsockfd < 0) { error("ERROR accepting"); }
 
@@ -85,7 +82,6 @@ void server(int port)
 
         printf("Connection established with %s\n", client_nickname);
 
-        // Set al vlues of buffer to zero
         bzero(buffer, 256);
 
         // Read the socket
