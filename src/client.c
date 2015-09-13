@@ -56,13 +56,14 @@ int main(int argc, char *argv[])
     printf("Nickname = ");
     fgets(nickname, 255, stdin);
     n = write(sockfd, nickname, strlen(nickname));
+    strtok(nickname, "\n");
 
     while (1)
     {
 
         // Send message
         bzero(buffer, 256);
-        printf("<you> ");
+        printf("<%s> ", nickname);
         fgets(buffer, 255, stdin);
 
         if (strcmp(buffer,"--EXIT--\n") == 0)

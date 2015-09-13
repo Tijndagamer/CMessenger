@@ -80,7 +80,7 @@ void server(int port)
         if (n < 0) { error("ERROR reading from socket while getting nickname"); }
         strtok(client_nickname, "\n");
 
-        printf("Connection established with %s\n", client_nickname);
+        printf("Connection established with %s on port %d\n", client_nickname, port);
 
         bzero(buffer, 256);
 
@@ -94,6 +94,6 @@ void server(int port)
             if (strcmp(buffer,"--EXIT--\n") == 0) { break; }
         }
 
-        printf("Connection with %s closed.\n", client_nickname);
+        printf("Connection with %s on port %d closed.\n", client_nickname, port);
     }
 }
